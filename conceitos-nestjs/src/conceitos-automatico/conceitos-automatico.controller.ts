@@ -1,9 +1,12 @@
 import { Controller, Get } from '@nestjs/common';
+import { ConceitosAutomaticoService } from './conceitos-automatico.service';
 
 @Controller('conceitos-automatico')
 export class ConceitosAutomaticoController {
-    @Get()
+    constructor(private readonly conceitosAutomaticoSerive: ConceitosAutomaticoService){}
+
+    @Get('hello')
     home(): string {
-        return 'Conceitos automatico'
+        return this.conceitosAutomaticoSerive.hello()
     }
 }
