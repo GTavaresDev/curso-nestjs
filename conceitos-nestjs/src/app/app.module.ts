@@ -6,9 +6,10 @@ import { ConceitosAutomaticoModule } from './conceitos-automatico/conceitos-auto
 import { Numero1Module } from './numero-1/numero-1.module';
 import { HelloModule } from './hello/hello.module';
 import { SalveModule } from './salve/salve.module';
+import { UsuariosModule } from './usuarios/usuarios.module';
 
 @Module({
-  imports: [ConceitosManualModule, ConceitosAutomaticoModule, Numero1Module, HelloModule, SalveModule],
+  imports: [ConceitosManualModule, ConceitosAutomaticoModule, Numero1Module, HelloModule, SalveModule, UsuariosModule],
   controllers: [AppController],
   providers: [AppService],
 })
