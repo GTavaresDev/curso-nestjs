@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { RecadosModule } from './recados/recados.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource, DataSourceOptions } from 'typeorm';
+import { UsuariosModule } from './usuarios/usuarios.module';
 
 const databaseLogger = new Logger('Database');
 
@@ -28,6 +29,7 @@ const databaseLogger = new Logger('Database');
       }),
     }),
     RecadosModule,
+    UsuariosModule,
   ],
   controllers: [AppController],
   providers: [AppService],
