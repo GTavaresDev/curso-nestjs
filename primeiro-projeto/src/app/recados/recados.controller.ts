@@ -11,7 +11,9 @@ import {
   Delete,
 } from '@nestjs/common';
 import { RecadosService } from './recados.service';
-import type { Recado } from '../../interfaces/recados.interface';
+import { CreateRecadoDto } from './dto/create-recado.dto';
+import { UpdateRecadoDto } from './dto/update-recado.dto';
+import type { Recado } from './entities/recado.entity';
 
 @Controller('recados')
 export class RecadosController {
@@ -29,12 +31,15 @@ export class RecadosController {
 
   @HttpCode(HttpStatus.CREATED)
   @Post()
-  createRecado(@Body() recado: Recado) {
+  createRecado(@Body() recado: CreateRecadoDto) {
     return this.recados.create(recado);
   }
 
   @Patch(':id')
-  updateRecado(@Param('id', ParseIntPipe) id: number, @Body() recado: Recado) {
+  updateRecado(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() recado: UpdateRecadoDto,
+  ) {
     return this.recados.updateOne(id, recado);
   }
 
