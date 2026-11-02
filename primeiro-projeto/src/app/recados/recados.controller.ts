@@ -20,7 +20,7 @@ export class RecadosController {
   constructor(private readonly recados: RecadosService) {}
   @HttpCode(HttpStatus.OK)
   @Get()
-  findAll(): Recado[] {
+  findAll(): Promise<Recado[]> {
     return this.recados.findAll();
   }
 
