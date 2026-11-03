@@ -7,6 +7,7 @@ import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Usuario } from './entities/usuario.entity';
+import { Recado } from '../recados/entities/recado.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -14,6 +15,8 @@ export class UsuariosService {
   constructor(
     @InjectRepository(Usuario)
     private readonly usersRepository: Repository<Usuario>,
+    @InjectRepository(Recado)
+    private readonly recadoRepository: Repository<Recado>,
   ) {}
 
   async create(createUserDto: CreateUsuarioDto) {
@@ -67,9 +70,19 @@ export class UsuariosService {
 
   async remove(id: number) {
     const user = await this.usersRepository.findOneBy({ id });
+
     if (!user) {
       throw new NotFoundException(
         'Não temos esse usuário cadastrado no sistema',
+      );
+    }
+
+    try {
+      // Apaga todos os recados em que o usuário é remetente OU destinatário
+      await this.recadoRepository.delete([{ de: { id } }, { para: { id } }]);
+    } catch {
+      throw new NotFoundException(
+        'Não foi possivel apagar os recados desse usuario ',
       );
     }
     return this.usersRepository.remove(user);

@@ -36,12 +36,35 @@ export class RecadosService {
   }
 
   async findAll() {
-    const recados = await this.recadoRepository.find();
+    const recados = await this.recadoRepository.find({
+      relations: {
+        de: true,
+        para: true,
+      },
+      select: {
+        de: {
+          id: true,
+          name: true,
+          email: true,
+        },
+        para: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    });
     return recados;
   }
 
   async findOneById(id: number): Promise<Recado> {
-    const recado = await this.recadoRepository.findOneBy({ id });
+    const recado = await this.recadoRepository.findOne({
+      where: { id },
+      relations: {
+        de: true,
+        para: true,
+      },
+    });
     if (recado) return recado;
     throw new NotFoundException('Recado não encontrado');
   }
