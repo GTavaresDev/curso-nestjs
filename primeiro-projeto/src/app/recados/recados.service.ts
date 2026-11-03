@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateRecadoDto } from './dto/create-recado.dto';
 import { UpdateRecadoDto } from './dto/update-recado.dto';
 import { Recado } from './entities/recado.entity';
+import { Usuario } from '../usuarios/entities/usuario.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -10,12 +11,25 @@ export class RecadosService {
   constructor(
     @InjectRepository(Recado)
     private readonly recadoRepository: Repository<Recado>,
+    @InjectRepository(Usuario)
+    private readonly usuarioRepository: Repository<Usuario>,
   ) {}
+  private async getUsuarioOrFail(id: number): Promise<Usuario> {
+    const usuario = await this.usuarioRepository.findOneBy({ id });
+    if (!usuario) {
+      throw new NotFoundException(`Usuário com id ${id} não encontrado`);
+    }
+    return usuario;
+  }
 
-  async create(recado: CreateRecadoDto): Promise<Recado> {
+  async create(recadoDto: CreateRecadoDto) {
+    const de = await this.getUsuarioOrFail(recadoDto.de);
+    const para = await this.getUsuarioOrFail(recadoDto.para);
     const newRecado = this.recadoRepository.create({
-      ...recado,
+      texto: recadoDto.texto,
       lido: false,
+      de,
+      para,
     });
 
     return this.recadoRepository.save(newRecado);
@@ -32,9 +46,20 @@ export class RecadosService {
     throw new NotFoundException('Recado não encontrado');
   }
 
-  async updateOne(id: number, recado: UpdateRecadoDto): Promise<Recado> {
-    const existingRecado = await this.findOneById(id);
-    this.recadoRepository.merge(existingRecado, recado);
+  async updateOne(id: number, recadoDto: UpdateRecadoDto) {
+    const existingRecado = await this.recadoRepository.findOneBy({ id });
+    if (!existingRecado) {
+      throw new NotFoundException(`Recado ${id} não encontrado`);
+    }
+
+    const { de, para, ...rest } = recadoDto;
+
+    this.recadoRepository.merge(existingRecado, rest);
+
+    if (de !== undefined) existingRecado.de = await this.getUsuarioOrFail(de);
+    if (para !== undefined)
+      existingRecado.para = await this.getUsuarioOrFail(para);
+
     return this.recadoRepository.save(existingRecado);
   }
 
