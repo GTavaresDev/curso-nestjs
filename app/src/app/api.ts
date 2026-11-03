@@ -28,6 +28,10 @@ export interface CreateRecadoInput {
   para: number; // ID do usuário destinatário
 }
 export type UpdateRecadoInput = Partial<CreateRecadoInput>;
+export interface RecadosPagination {
+  limit?: number;
+  offset?: number;
+}
 
 /* ------------------------- Requisição base ------------------------ */
 
@@ -84,7 +88,13 @@ export const usuariosApi = {
 
 export const recadosApi = {
   create: (input: CreateRecadoInput) => request("POST", "/recados", input),
-  list: () => request("GET", "/recados"),
+  list: ({ limit, offset }: RecadosPagination = {}) => {
+    const params = new URLSearchParams();
+    if (limit !== undefined) params.set("limit", String(limit));
+    if (offset !== undefined) params.set("offset", String(offset));
+    const query = params.toString();
+    return request("GET", `/recados${query ? `?${query}` : ""}`);
+  },
   getById: (id: number) => request("GET", `/recados/${id}`),
   update: (id: number, input: UpdateRecadoInput) =>
     request("PATCH", `/recados/${id}`, input),

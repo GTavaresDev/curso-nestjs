@@ -85,8 +85,11 @@ curl -X POST http://localhost:3000/recados \
     "para": 2
   }'
 
-# Listar recados
-curl http://localhost:3000/recados
+# Listar recados (padrão: limit=10 e offset=0)
+curl "http://localhost:3000/recados"
+
+# Listar 5 recados, pulando os 10 primeiros
+curl "http://localhost:3000/recados?limit=5&offset=10"
 
 # Buscar recado por ID
 curl http://localhost:3000/recados/1

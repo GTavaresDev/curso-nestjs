@@ -9,19 +9,21 @@ import {
   Patch,
   Post,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { RecadosService } from './recados.service';
 import { CreateRecadoDto } from './dto/create-recado.dto';
 import { UpdateRecadoDto } from './dto/update-recado.dto';
 import type { Recado } from './entities/recado.entity';
+import { PaginationDto } from '../common/dto/pagination.dto';
 
 @Controller('recados')
 export class RecadosController {
   constructor(private readonly recados: RecadosService) {}
   @HttpCode(HttpStatus.OK)
   @Get()
-  findAll(): Promise<Recado[]> {
-    return this.recados.findAll();
+  findAll(@Query() paginationDto: PaginationDto): Promise<Recado[]> {
+    return this.recados.findAll(paginationDto);
   }
 
   @Get(':id')

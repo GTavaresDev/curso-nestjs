@@ -5,6 +5,7 @@ import { Recado } from './entities/recado.entity';
 import { Usuario } from '../usuarios/entities/usuario.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { PaginationDto } from '../common/dto/pagination.dto';
 
 @Injectable()
 export class RecadosService {
@@ -35,8 +36,11 @@ export class RecadosService {
     return this.recadoRepository.save(newRecado);
   }
 
-  async findAll() {
+  async findAll(paginationDto: PaginationDto) {
+    const { limit = 10, offset = 0 } = paginationDto;
     const recados = await this.recadoRepository.find({
+      skip: offset,
+      take: limit,
       relations: {
         de: true,
         para: true,

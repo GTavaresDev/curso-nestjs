@@ -8,6 +8,7 @@ async function bootstrap() {
   //Valida os campos do dto
   app.useGlobalPipes(
     new ValidationPipe({
+      transform: true,
       whitelist: true, // remove chaves não validadas no dto
       forbidNonWhitelisted: true, // retornar que o campo errado não pertence ao boddy
     }),

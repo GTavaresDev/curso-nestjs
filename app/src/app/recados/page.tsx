@@ -15,6 +15,7 @@ import {
 export default function RecadosPanel() {
   const [result, setResult] = useState<ApiResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({ limit: "10", offset: "0" });
 
   // Criar
   const [createForm, setCreateForm] = useState({ texto: "", de: "", para: "" });
@@ -56,6 +57,22 @@ export default function RecadosPanel() {
     const id = toId(getId);
     if (!id) return setResult(localError("Informe um ID válido."));
     run(() => recadosApi.getById(id));
+  }
+
+  function handleList() {
+    const limit = Number(pagination.limit);
+    const offset = Number(pagination.offset);
+    if (
+      !Number.isInteger(limit) ||
+      limit < 0 ||
+      !Number.isInteger(offset) ||
+      offset < 0
+    ) {
+      return setResult(
+        localError("Limit e offset devem ser números inteiros maiores ou iguais a zero."),
+      );
+    }
+    run(() => recadosApi.list({ limit, offset }));
   }
 
   function handleUpdate() {
@@ -137,13 +154,39 @@ export default function RecadosPanel() {
       {/* Listar */}
       <div style={styles.section}>
         <h3 style={styles.title}>Listar recados</h3>
-        <button
-          style={styles.button}
-          onClick={() => run(recadosApi.list)}
-          disabled={loading}
-        >
-          Listar
-        </button>
+        <div style={styles.row}>
+          <label>
+            Limit{" "}
+            <input
+              style={styles.input}
+              type="number"
+              min="0"
+              value={pagination.limit}
+              onChange={(e) =>
+                setPagination({ ...pagination, limit: e.target.value })
+              }
+            />
+          </label>
+          <label>
+            Offset{" "}
+            <input
+              style={styles.input}
+              type="number"
+              min="0"
+              value={pagination.offset}
+              onChange={(e) =>
+                setPagination({ ...pagination, offset: e.target.value })
+              }
+            />
+          </label>
+          <button
+            style={styles.button}
+            onClick={handleList}
+            disabled={loading}
+          >
+            Listar
+          </button>
+        </div>
       </div>
 
       {/* Buscar por ID */}
