@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,19 +16,23 @@ export class UsuariosService {
     private readonly usersRepository: Repository<Usuario>,
   ) {}
 
-  create(createUserDto: CreateUsuarioDto) {
-    const newUser = this.usersRepository.create({
-      ...createUserDto,
-    });
-
-    return this.usersRepository.save(newUser);
+  async create(createUserDto: CreateUsuarioDto) {
+    try {
+      const newUser = await this.usersRepository.create({
+        ...createUserDto,
+      });
+      return await this.usersRepository.save(newUser);
+    } catch (error) {
+      if (this.isDuplicateEmailError(error)) {
+        throw new ConflictException('E-mail já está configurado');
+      }
+      throw error;
+    }
   }
 
   async findAll() {
     const users = await this.usersRepository.find();
-    if (users.length === 0) {
-      throw new NotFoundException('Não temos usuários cadastrados no sistema');
-    }
+
     return users;
   }
 
@@ -46,7 +54,15 @@ export class UsuariosService {
       );
     }
     this.usersRepository.merge(existingUser, updateUserDto);
-    return this.usersRepository.save(existingUser);
+
+    try {
+      return await this.usersRepository.save(existingUser);
+    } catch (error) {
+      if (this.isDuplicateEmailError(error)) {
+        throw new ConflictException('E-mail já está configurado');
+      }
+      throw error;
+    }
   }
 
   async remove(id: number) {
@@ -57,5 +73,14 @@ export class UsuariosService {
       );
     }
     return this.usersRepository.remove(user);
+  }
+
+  private isDuplicateEmailError(error: unknown): boolean {
+    return (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      error.code === '23505'
+    );
   }
 }
