@@ -3,7 +3,6 @@ import {
   MiddlewareConsumer,
   Module,
   NestModule,
-  RequestMethod,
 } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
@@ -16,6 +15,8 @@ import { SimpleMiddleware } from './common/middleware/simple.middleware';
 import { Step2Middleware } from './common/middleware/step2.middleware';
 import { APP_FILTER } from '@nestjs/core';
 import { MyExceptionFilter } from './common/filters/my-exception.filter';
+import { UsuariosController } from './usuarios/usuarios.controller';
+import { RecadosController } from './recados/recados.controller';
 
 const databaseLogger = new Logger('Database');
 
@@ -52,13 +53,10 @@ const databaseLogger = new Logger('Database');
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    (consumer.apply(SimpleMiddleware, Step2Middleware).forRoutes({
-      path: 'recados',
-      method: RequestMethod.ALL,
-    }),
-      consumer.apply(SimpleMiddleware).forRoutes({
-        path: 'usuarios',
-        method: RequestMethod.ALL,
-      }));
+    consumer
+      .apply(SimpleMiddleware, Step2Middleware)
+      .forRoutes(RecadosController);
+
+    consumer.apply(SimpleMiddleware).forRoutes(UsuariosController);
   }
 }
