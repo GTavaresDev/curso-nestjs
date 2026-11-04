@@ -14,6 +14,8 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 import { UsuariosModule } from './usuarios/usuarios.module';
 import { SimpleMiddleware } from './common/middleware/simple.middleware';
 import { Step2Middleware } from './common/middleware/step2.middleware';
+import { APP_FILTER } from '@nestjs/core';
+import { MyExceptionFilter } from './common/filters/my-exception.filter';
 
 const databaseLogger = new Logger('Database');
 
@@ -40,7 +42,13 @@ const databaseLogger = new Logger('Database');
     UsuariosModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: MyExceptionFilter,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
