@@ -22,9 +22,11 @@ import { ParseIntIdPipe } from '../common/pipes/parse-int-id.pipe';
 import { AddHeaderInterceptor } from '../common/interceptors/add-header.interceptor';
 import { TimingConnectionInterceptor } from '../common/interceptors/timing-connection.interceptor';
 import { ErrorHandlingInterceptor } from '../common/interceptors/error-handling.interceptor';
+import { SimpleCacheInterceptor } from '../common/interceptors/simple-cache.interceptor';
 
 @Controller('recados')
 @UsePipes(ParseIntIdPipe)
+@UseInterceptors(SimpleCacheInterceptor)
 export class RecadosController {
   constructor(private readonly recados: RecadosService) {}
 
