@@ -20,13 +20,15 @@ import type { Recado } from './entities/recado.entity';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { ParseIntIdPipe } from '../common/pipes/parse-int-id.pipe';
 import { AddHeaderInterceptor } from '../common/interceptors/add-header.interceptor';
+import { TimingConnectionInterceptor } from '../common/interceptors/timing-connection.interceptor';
 
 @Controller('recados')
 @UsePipes(ParseIntIdPipe)
 export class RecadosController {
   constructor(private readonly recados: RecadosService) {}
+
   @HttpCode(HttpStatus.OK)
-  @UseInterceptors(AddHeaderInterceptor)
+  @UseInterceptors(AddHeaderInterceptor, TimingConnectionInterceptor)
   @Get()
   findAll(@Query() paginationDto: PaginationDto): Promise<Recado[]> {
     return this.recados.findAll(paginationDto);
