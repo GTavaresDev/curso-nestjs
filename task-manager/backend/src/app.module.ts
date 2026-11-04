@@ -9,6 +9,7 @@ import { Task } from './tasks/entities/task.entity.js';
 import { DatabaseService } from './database/database.service.js';
 import { UsersModule } from './users/users.module.js';
 import { User } from './users/entities/user.entity.js';
+import 'pg';
 
 @Module({
   imports: [
