@@ -5,6 +5,7 @@ import {
   Body,
   Patch,
   Param,
+  ParseIntPipe,
   Delete,
   UseInterceptors,
 } from '@nestjs/common';
@@ -38,6 +39,11 @@ export class UsuariosController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.usuariosService.findOne(+id);
+  }
+
+  @Get(':id/recados')
+  findRecados(@Param('id', ParseIntPipe) id: number) {
+    return this.usuariosService.findRecados(id);
   }
 
   @Patch(':id')

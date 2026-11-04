@@ -1,6 +1,8 @@
 import {
   ConflictException,
+  forwardRef,
   Injectable,
+  Inject,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
@@ -8,6 +10,7 @@ import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Usuario } from './entities/usuario.entity';
 import { Recado } from '../recados/entities/recado.entity';
+import { RecadosService } from '../recados/recados.service';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -17,6 +20,8 @@ export class UsuariosService {
     private readonly usersRepository: Repository<Usuario>,
     @InjectRepository(Recado)
     private readonly recadoRepository: Repository<Recado>,
+    @Inject(forwardRef(() => RecadosService))
+    private readonly recadosService: RecadosService,
   ) {}
 
   async create(createUserDto: CreateUsuarioDto) {
@@ -47,6 +52,11 @@ export class UsuariosService {
       );
     }
     return user;
+  }
+
+  async findRecados(id: number) {
+    await this.findOne(id);
+    return this.recadosService.findByUsuarioId(id);
   }
 
   async update(id: number, updateUserDto: UpdateUsuarioDto) {

@@ -1,26 +1,28 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateRecadoDto } from './dto/create-recado.dto';
 import { UpdateRecadoDto } from './dto/update-recado.dto';
 import { Recado } from './entities/recado.entity';
-import { Usuario } from '../usuarios/entities/usuario.entity';
+import type { Usuario } from '../usuarios/entities/usuario.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PaginationDto } from '../common/dto/pagination.dto';
+import { UsuariosService } from '../usuarios/usuarios.service';
 
 @Injectable()
 export class RecadosService {
   constructor(
     @InjectRepository(Recado)
     private readonly recadoRepository: Repository<Recado>,
-    @InjectRepository(Usuario)
-    private readonly usuarioRepository: Repository<Usuario>,
+    @Inject(forwardRef(() => UsuariosService))
+    private readonly usuariosService: UsuariosService,
   ) {}
   private async getUsuarioOrFail(id: number): Promise<Usuario> {
-    const usuario = await this.usuarioRepository.findOneBy({ id });
-    if (!usuario) {
-      throw new NotFoundException(`Usuário com id ${id} não encontrado`);
-    }
-    return usuario;
+    return this.usuariosService.findOne(id);
   }
 
   async create(recadoDto: CreateRecadoDto) {
@@ -59,6 +61,28 @@ export class RecadosService {
       },
     });
     return recados;
+  }
+
+  async findByUsuarioId(id: number): Promise<Recado[]> {
+    return this.recadoRepository.find({
+      where: [{ de: { id } }, { para: { id } }],
+      relations: {
+        de: true,
+        para: true,
+      },
+      select: {
+        de: {
+          id: true,
+          name: true,
+          email: true,
+        },
+        para: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    });
   }
 
   async findOneById(id: number): Promise<Recado> {
