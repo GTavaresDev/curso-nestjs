@@ -27,6 +27,18 @@ export async function getTasksByUser(userId: string): Promise<Task[]> {
   return response.json();
 }
 
+export async function createTask(userId: string, content: string) {
+  const response = await fetch(`${apiUrl}/tasks`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: Number(userId), content }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Erro ao criar a tarefa: ${response.status}`);
+  }
+}
+
 export async function updateTask(id: number, content: string) {
   const response = await fetch(`${apiUrl}/tasks/${id}`, {
     method: "PATCH",
