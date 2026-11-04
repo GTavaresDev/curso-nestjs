@@ -12,6 +12,7 @@ import {
   Query,
   UsePipes,
   UseInterceptors,
+  Req,
 } from '@nestjs/common';
 import { RecadosService } from './recados.service';
 import { CreateRecadoDto } from './dto/create-recado.dto';
@@ -23,6 +24,7 @@ import { AddHeaderInterceptor } from '../common/interceptors/add-header.intercep
 import { TimingConnectionInterceptor } from '../common/interceptors/timing-connection.interceptor';
 import { ErrorHandlingInterceptor } from '../common/interceptors/error-handling.interceptor';
 import { SimpleCacheInterceptor } from '../common/interceptors/simple-cache.interceptor';
+import type { Request } from 'express';
 
 @Controller('recados')
 @UsePipes(ParseIntIdPipe)
@@ -33,7 +35,11 @@ export class RecadosController {
   @HttpCode(HttpStatus.OK)
   @UseInterceptors(AddHeaderInterceptor, TimingConnectionInterceptor)
   @Get()
-  findAll(@Query() paginationDto: PaginationDto): Promise<Recado[]> {
+  findAll(
+    @Query() paginationDto: PaginationDto,
+    @Req() req: Request,
+  ): Promise<Recado[]> {
+    console.log('Resposta do controller:', req.user);
     return this.recados.findAll(paginationDto);
   }
   @UseInterceptors(TimingConnectionInterceptor, ErrorHandlingInterceptor)

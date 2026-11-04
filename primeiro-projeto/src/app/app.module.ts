@@ -1,4 +1,10 @@
-import { Logger, Module } from '@nestjs/common';
+import {
+  Logger,
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -6,6 +12,8 @@ import { RecadosModule } from './recados/recados.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { UsuariosModule } from './usuarios/usuarios.module';
+import { SimpleMiddleware } from './common/middleware/simple.middleware';
+import { Step2Middleware } from './common/middleware/step2.middleware';
 
 const databaseLogger = new Logger('Database');
 
@@ -34,4 +42,11 @@ const databaseLogger = new Logger('Database');
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(SimpleMiddleware, Step2Middleware).forRoutes({
+      path: 'recados',
+      method: RequestMethod.ALL,
+    });
+  }
+}
