@@ -52,9 +52,13 @@ const databaseLogger = new Logger('Database');
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(SimpleMiddleware, Step2Middleware).forRoutes({
+    (consumer.apply(SimpleMiddleware, Step2Middleware).forRoutes({
       path: 'recados',
       method: RequestMethod.ALL,
-    });
+    }),
+      consumer.apply(SimpleMiddleware).forRoutes({
+        path: 'usuarios',
+        method: RequestMethod.ALL,
+      }));
   }
 }

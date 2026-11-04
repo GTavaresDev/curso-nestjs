@@ -13,7 +13,7 @@ export class AuthTokenInterceptor implements NestInterceptor {
     if (!token || token != 'Token30') {
       throw new UnauthorizedException(`Usuário sem permissão`);
     }
-    console.log(`Token: ${token}`);
+    console.log(`Token: ${token} ✔️`);
     return next.handle();
   }
 }

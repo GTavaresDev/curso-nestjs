@@ -13,7 +13,7 @@ declare global {
 
 export class SimpleMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
-    console.log('SimpleMiddleware: Olá');
+    console.log('SimpleMiddleware: ✔️');
 
     //Termina a cadeia de chamadas (mata o request)
     // return res.status(404).send({
@@ -28,7 +28,7 @@ export class SimpleMiddleware implements NestMiddleware {
     next();
 
     res.on('finish', () => {
-      console.log('Sua conexão com o servidor acabou!');
+      console.log('Sua conexão com o servidor acabou! ✔️');
     });
   }
 }
