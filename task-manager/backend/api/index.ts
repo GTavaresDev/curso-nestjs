@@ -7,9 +7,17 @@ export default async function handler(
   request: VercelRequest,
   response: VercelResponse,
 ) {
-  appPromise ??= createApp();
-  const app = await appPromise;
-  const expressApp = app.getHttpAdapter().getInstance();
+  try {
+    appPromise ??= createApp();
+    const app = await appPromise;
+    const expressApp = app.getHttpAdapter().getInstance();
 
-  return expressApp(request, response);
+    return expressApp(request, response);
+  } catch (error) {
+    appPromise = undefined;
+    console.error("Failed to initialize NestJS application", error);
+    return response.status(500).json({
+      message: "Failed to initialize backend",
+    });
+  }
 }
