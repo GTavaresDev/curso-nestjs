@@ -5,6 +5,7 @@ import {
   Body,
   Patch,
   Param,
+  ParseIntPipe,
   Delete,
 } from '@nestjs/common';
 import { TaskService } from './task.service.js';
@@ -23,6 +24,11 @@ export class TaskController {
   @Get()
   findAll() {
     return this.taskService.findAll();
+  }
+
+  @Get('user/:id')
+  findTask(@Param('id', ParseIntPipe) id: number) {
+    return this.taskService.findTaskByUser(id);
   }
 
   @Get(':id')

@@ -4,19 +4,28 @@ import { UpdateTaskDto } from './dto/update-task.dto.js';
 import { Task } from './entities/task.entity.js';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { User } from '../users/entities/user.entity.js';
 
 @Injectable()
 export class TaskService {
   constructor(
     @InjectRepository(Task)
     private readonly taskRepository: Repository<Task>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async create(createTaskDto: CreateTaskDto) {
-    const task = await this.taskRepository.create(createTaskDto);
-    if (!task) {
-      throw new NotFoundException(`Falha ao criar uma tarefa`);
+    const user = await this.userRepository.findOneBy({ id: createTaskDto.name });
+    if (!user) {
+      throw new NotFoundException(`Usuário ${createTaskDto.name} não encontrado`);
     }
+
+    const task = this.taskRepository.create({
+      content: createTaskDto.content,
+      user,
+    });
+
     return this.taskRepository.save(task);
   }
 
@@ -39,11 +48,34 @@ export class TaskService {
   }
 
   async findOne(id: number) {
-    const task = await this.taskRepository.findOneBy({ id });
+    const task = await this.taskRepository.findOne({
+      where: { id },
+      select: {
+        user: {
+          id: true,
+          name: true,
+        },
+      },
+      relations: {
+        user: true,
+      },
+    });
     if (!task) {
       throw new NotFoundException(`Tarefa ${id} não encontrada `);
     }
     return task;
+  }
+
+  async findTaskByUser(id: number) {
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) {
+      throw new NotFoundException(`Usuário ${id} não encontrado`);
+    }
+
+    return this.taskRepository.find({
+      where: { user: { id } },
+      relations: { user: true },
+    });
   }
 
   async update(id: number, updateTaskDto: UpdateTaskDto) {

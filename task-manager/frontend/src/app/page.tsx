@@ -1,15 +1,13 @@
-"use client";
-
-import { useBackendMessage } from "./hooks/useBackendMessage";
+import { buscar } from "./actions";
 
 export default function Home() {
-  const { message, error } = useBackendMessage();
-
   return (
-    <main className="flex min-h-screen items-center justify-center">
-      <div className="text-center">
-        <p className="text-3xl font-bold">{error || message}</p>
-      </div>
-    </main>
+    <div>
+      <form action={buscar}>
+        <label htmlFor="userId">ID do usuário:</label>
+        <input id="userId" name="userId" type="number" min="1" required />
+        <button type="submit">Buscar</button>
+      </form>
+    </div>
   );
 }
