@@ -11,10 +11,10 @@ import {
 import { UsuariosService } from './usuarios.service';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
-import { ChangeDataInterceptor } from '../common/interceptors/change-data.interceptor';
+import { AuthTokenInterceptor } from '../common/interceptors/auth-token.interceptor';
 
 @Controller('usuarios')
-@UseInterceptors(ChangeDataInterceptor)
+@UseInterceptors(AuthTokenInterceptor)
 export class UsuariosController {
   constructor(private readonly usuariosService: UsuariosService) {}
 
