@@ -21,6 +21,7 @@ import { PaginationDto } from '../common/dto/pagination.dto';
 import { ParseIntIdPipe } from '../common/pipes/parse-int-id.pipe';
 import { AddHeaderInterceptor } from '../common/interceptors/add-header.interceptor';
 import { TimingConnectionInterceptor } from '../common/interceptors/timing-connection.interceptor';
+import { ErrorHandlingInterceptor } from '../common/interceptors/error-handling.interceptor';
 
 @Controller('recados')
 @UsePipes(ParseIntIdPipe)
@@ -33,7 +34,7 @@ export class RecadosController {
   findAll(@Query() paginationDto: PaginationDto): Promise<Recado[]> {
     return this.recados.findAll(paginationDto);
   }
-
+  @UseInterceptors(TimingConnectionInterceptor, ErrorHandlingInterceptor)
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.recados.findOneById(id);
