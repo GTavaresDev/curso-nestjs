@@ -4,6 +4,8 @@ import { RecadosController } from './recados.controller';
 import { RecadosService } from './recados.service';
 import { Recado } from './entities/recado.entity';
 import { UsuariosModule } from '../usuarios/usuarios.module';
+import { RegexFactory } from '../common/regex/regex.factory';
+import { RemoveSpacesRegex } from '../common/regex/remove-spaces.regex';
 
 @Module({
   imports: [
@@ -11,7 +13,7 @@ import { UsuariosModule } from '../usuarios/usuarios.module';
     forwardRef(() => UsuariosModule),
   ],
   controllers: [RecadosController],
-  providers: [RecadosService],
+  providers: [RecadosService, RegexFactory],
   exports: [RecadosService],
 })
 export class RecadosModule {}

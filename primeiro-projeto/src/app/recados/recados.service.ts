@@ -12,6 +12,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { UsuariosService } from '../usuarios/usuarios.service';
+import { RegexFactory } from '../common/regex/regex.factory';
 
 @Injectable()
 export class RecadosService {
@@ -20,7 +21,9 @@ export class RecadosService {
     private readonly recadoRepository: Repository<Recado>,
     @Inject(forwardRef(() => UsuariosService))
     private readonly usuariosService: UsuariosService,
+    private readonly regexFactory: RegexFactory,
   ) {}
+
   private async getUsuarioOrFail(id: number): Promise<Usuario> {
     return this.usuariosService.findOne(id);
   }
@@ -60,7 +63,13 @@ export class RecadosService {
         },
       },
     });
-    return recados;
+
+    const removeSpaces = this.regexFactory.create('RemoveSpacesRegex');
+
+    return recados.map((recado) => ({
+      ...recado,
+      texto: removeSpaces.execute(recado.texto),
+    }));
   }
 
   async findByUsuarioId(id: number): Promise<Recado[]> {
