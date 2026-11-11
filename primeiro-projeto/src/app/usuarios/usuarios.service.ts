@@ -12,12 +12,14 @@ import { Usuario } from './entities/usuario.entity';
 import { Recado } from '../recados/entities/recado.entity';
 import { RecadosService } from '../recados/recados.service';
 import { Repository } from 'typeorm';
+import { HashingServiceProtocol } from '../auth/hasing/hashing.protocol';
 
 @Injectable()
 export class UsuariosService {
   constructor(
     @InjectRepository(Usuario)
     private readonly usersRepository: Repository<Usuario>,
+    private readonly hashingService: HashingServiceProtocol,
     @InjectRepository(Recado)
     private readonly recadoRepository: Repository<Recado>,
     @Inject(forwardRef(() => RecadosService))
@@ -26,8 +28,12 @@ export class UsuariosService {
 
   async create(createUserDto: CreateUsuarioDto) {
     try {
+      const passwordHash = await this.hashingService.hash(
+        createUserDto.passwordHash,
+      );
       const newUser = await this.usersRepository.create({
         ...createUserDto,
+        passwordHash,
       });
       return await this.usersRepository.save(newUser);
     } catch (error) {
@@ -59,14 +65,23 @@ export class UsuariosService {
     return this.recadosService.findByUsuarioId(id);
   }
 
-  async update(id: number, updateUserDto: UpdateUsuarioDto) {
+  async update(id: number, updateUsuarioDto: UpdateUsuarioDto) {
     const existingUser = await this.usersRepository.findOneBy({ id });
+
     if (!existingUser) {
       throw new NotFoundException(
         'Não temos esse usuário cadastrado no sistema',
       );
     }
-    this.usersRepository.merge(existingUser, updateUserDto);
+
+    // Separa a senha do resto para o merge não sobrescrever o hash
+    const { passwordHash, ...dadosSemSenha } = updateUsuarioDto;
+
+    if (passwordHash) {
+      existingUser.passwordHash = await this.hashingService.hash(passwordHash);
+    }
+
+    this.usersRepository.merge(existingUser, dadosSemSenha);
 
     try {
       return await this.usersRepository.save(existingUser);

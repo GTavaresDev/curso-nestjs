@@ -1,9 +1,4 @@
-import {
-  Logger,
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-} from '@nestjs/common';
+import { Logger, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -17,6 +12,7 @@ import { APP_FILTER } from '@nestjs/core';
 import { MyExceptionFilter } from './common/filters/my-exception.filter';
 import { UsuariosController } from './usuarios/usuarios.controller';
 import { RecadosController } from './recados/recados.controller';
+import { AuthModule } from './auth/auth.module';
 
 const databaseLogger = new Logger('Database');
 
@@ -41,6 +37,7 @@ const databaseLogger = new Logger('Database');
     }),
     RecadosModule,
     UsuariosModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
