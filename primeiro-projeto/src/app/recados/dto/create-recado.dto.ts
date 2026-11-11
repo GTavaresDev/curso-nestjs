@@ -14,9 +14,5 @@ export class CreateRecadoDto {
 
   @IsInt()
   @IsPositive()
-  readonly de: number; // ID do usuário que envia
-
-  @IsInt()
-  @IsPositive()
   readonly para: number; // ID do usuário que recebe
 }

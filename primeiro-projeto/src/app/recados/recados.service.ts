@@ -1,4 +1,5 @@
 import {
+  ForbiddenException,
   forwardRef,
   Inject,
   Injectable,
@@ -13,6 +14,7 @@ import { Repository } from 'typeorm';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { UsuariosService } from '../usuarios/usuarios.service';
 import { RegexFactory } from '../common/regex/regex.factory';
+import { TokenPayloadDto } from '../auth/dto/token-payload.dto';
 
 @Injectable()
 export class RecadosService {
@@ -28,8 +30,8 @@ export class RecadosService {
     return this.usuariosService.findOne(id);
   }
 
-  async create(recadoDto: CreateRecadoDto) {
-    const de = await this.getUsuarioOrFail(recadoDto.de);
+  async create(recadoDto: CreateRecadoDto, tokenPayload: TokenPayloadDto) {
+    const de = await this.getUsuarioOrFail(tokenPayload.sub);
     const para = await this.getUsuarioOrFail(recadoDto.para);
     const newRecado = this.recadoRepository.create({
       texto: recadoDto.texto,
@@ -106,25 +108,38 @@ export class RecadosService {
     throw new NotFoundException('Recado não encontrado');
   }
 
-  async updateOne(id: number, recadoDto: UpdateRecadoDto) {
-    const existingRecado = await this.recadoRepository.findOneBy({ id });
-    if (!existingRecado) {
-      throw new NotFoundException(`Recado ${id} não encontrado`);
+  async updateOne(
+    id: number,
+    recadoDto: UpdateRecadoDto,
+    tokenPayload: TokenPayloadDto,
+  ) {
+    const existingRecado = await this.findOneById(id);
+
+    if (existingRecado.de.id !== tokenPayload.sub) {
+      throw new ForbiddenException(
+        'Você não tem autorização para alterar este recado.',
+      );
     }
 
-    const { de, para, ...rest } = recadoDto;
+    const { para, ...rest } = recadoDto;
 
     this.recadoRepository.merge(existingRecado, rest);
 
-    if (de !== undefined) existingRecado.de = await this.getUsuarioOrFail(de);
     if (para !== undefined)
       existingRecado.para = await this.getUsuarioOrFail(para);
 
     return this.recadoRepository.save(existingRecado);
   }
 
-  async removeOne(id: number): Promise<Recado> {
+  async removeOne(id: number, tokenPayload: TokenPayloadDto): Promise<Recado> {
     const recado = await this.findOneById(id);
+
+    if (recado.de.id !== tokenPayload.sub) {
+      throw new ForbiddenException(
+        'Você não tem autorização para excluir este recado.',
+      );
+    }
+
     return this.recadoRepository.remove(recado);
   }
 }
