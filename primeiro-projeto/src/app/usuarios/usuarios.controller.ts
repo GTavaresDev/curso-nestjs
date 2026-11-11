@@ -7,17 +7,14 @@ import {
   Param,
   ParseIntPipe,
   Delete,
-  UseInterceptors,
 } from '@nestjs/common';
 import { UsuariosService } from './usuarios.service';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
-import { AuthTokenInterceptor } from '../common/interceptors/auth-token.interceptor';
 import { UrlParam } from '../common/params/url.params';
 import { ReqDataParams } from '../common/params/req-data.params';
 
 @Controller('usuarios')
-@UseInterceptors(AuthTokenInterceptor)
 export class UsuariosController {
   constructor(private readonly usuariosService: UsuariosService) {}
 
