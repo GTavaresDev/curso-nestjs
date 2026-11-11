@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { HashingServiceProtocol } from './hasing/hashing.protocol';
 import type { ConfigType } from '@nestjs/config';
 import jwtConfig from './_config/jwt.config';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -15,12 +16,13 @@ export class AuthService {
     private readonly hashingService: HashingServiceProtocol,
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
-  ) {
-    console.log(jwtConfiguration);
-  }
+    private readonly jwtService: JwtService,
+  ) {}
   async login(loginDto: LoginDto) {
     let passwordIsValid = false;
     let throwError = true;
+
+    //Verificação se user e senha existem
     const user = await this.userRepository.findOneBy({
       email: loginDto.email,
     });
@@ -37,6 +39,19 @@ export class AuthService {
     if (throwError) {
       throw new UnauthorizedException('Usuário ou senha invalido');
     }
-    return loginDto;
+
+    //Assinar e entregar token JWT para o User
+    const accessToken = await this.jwtService.signAsync(
+      {
+        sub: user?.id,
+      },
+      {
+        audience: this.jwtConfiguration.audience,
+        issuer: this.jwtConfiguration.issuer,
+        secret: this.jwtConfiguration.secret,
+        expiresIn: this.jwtConfiguration.ttl,
+      },
+    );
+    return { accessToken };
   }
 }
