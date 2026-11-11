@@ -11,6 +11,7 @@ import type { ConfigType } from '@nestjs/config';
 import { Request } from 'express';
 import jwtConfig from './_config/jwt.config';
 import { IS_PUBLIC_KEY } from '../common/params/is-public.decorator';
+import { REQUEST_TOKEN_PAYLOAD_KEY } from './auth.constants';
 
 @Injectable()
 export class AuthTokenGuard implements CanActivate {
@@ -45,6 +46,7 @@ export class AuthTokenGuard implements CanActivate {
         issuer: this.jwtConfiguration.issuer,
       });
 
+      (request as Record<string, any>)[REQUEST_TOKEN_PAYLOAD_KEY] = payload;
       request['user'] = payload;
       return true;
     } catch (error) {

@@ -13,6 +13,8 @@ import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { UrlParam } from '../common/params/url.params';
 import { ReqDataParams } from '../common/params/req-data.params';
+import { TokenPayloadParam } from '../auth/params/token-payload.param';
+import { TokenPayloadDto } from '../auth/dto/token-payload.dto';
 
 @Controller('usuarios')
 export class UsuariosController {
@@ -44,8 +46,12 @@ export class UsuariosController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUsuarioDto: UpdateUsuarioDto) {
-    return this.usuariosService.update(+id, updateUsuarioDto);
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateUsuarioDto: UpdateUsuarioDto,
+    @TokenPayloadParam() tokenPayload: TokenPayloadDto,
+  ) {
+    return this.usuariosService.update(id, updateUsuarioDto, tokenPayload);
   }
 
   @Delete(':id')

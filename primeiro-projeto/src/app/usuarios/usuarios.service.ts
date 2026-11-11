@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   forwardRef,
   Injectable,
   Inject,
@@ -13,6 +14,7 @@ import { Recado } from '../recados/entities/recado.entity';
 import { RecadosService } from '../recados/recados.service';
 import { Repository } from 'typeorm';
 import { HashingServiceProtocol } from '../auth/hasing/hashing.protocol';
+import { TokenPayloadDto } from '../auth/dto/token-payload.dto';
 
 @Injectable()
 export class UsuariosService {
@@ -65,12 +67,22 @@ export class UsuariosService {
     return this.recadosService.findByUsuarioId(id);
   }
 
-  async update(id: number, updateUsuarioDto: UpdateUsuarioDto) {
+  async update(
+    id: number,
+    updateUsuarioDto: UpdateUsuarioDto,
+    tokenPayload?: TokenPayloadDto,
+  ) {
     const existingUser = await this.usersRepository.findOneBy({ id });
 
     if (!existingUser) {
       throw new NotFoundException(
         'Não temos esse usuário cadastrado no sistema',
+      );
+    }
+
+    if (tokenPayload && existingUser.id !== tokenPayload.sub) {
+      throw new ForbiddenException(
+        'Você não tem autorização para atualizar os dados de outro usuário.',
       );
     }
 
