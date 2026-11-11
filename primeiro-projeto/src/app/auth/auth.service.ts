@@ -7,6 +7,7 @@ import { HashingServiceProtocol } from './hasing/hashing.protocol';
 import type { ConfigType } from '@nestjs/config';
 import jwtConfig from './_config/jwt.config';
 import { JwtService } from '@nestjs/jwt';
+import { RefreshTokenDTO } from './dto/refresh-token.dto';
 
 @Injectable()
 export class AuthService {
@@ -36,23 +37,64 @@ export class AuthService {
     if (passwordIsValid) {
       throwError = false;
     }
-    if (throwError) {
+    if (throwError || !user) {
       throw new UnauthorizedException('Usuário ou senha invalido');
     }
 
-    //Assinar e entregar token JWT para o User
-    const accessToken = await this.jwtService.signAsync(
+    return this.generateTokens(user);
+  }
+
+  private async signJwt<T extends Record<string, any>>(
+    sub: number,
+    expiresIn: number,
+    payload?: T,
+  ) {
+    return await this.jwtService.signAsync(
       {
-        sub: user?.id,
-        email: user?.email,
+        sub,
+        ...payload,
       },
       {
         audience: this.jwtConfiguration.audience,
         issuer: this.jwtConfiguration.issuer,
         secret: this.jwtConfiguration.secret,
-        expiresIn: this.jwtConfiguration.ttl,
+        expiresIn,
       },
     );
-    return { accessToken };
+  }
+
+  private async generateTokens(user: Usuario) {
+    const [accessToken, refreshToken] = await Promise.all([
+      this.signJwt(user.id, this.jwtConfiguration.ttl, { email: user.email }),
+      this.signJwt(user.id, this.jwtConfiguration.jwtRefreshTtl),
+    ]);
+
+    return {
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  async refreshTokens(refreshTokenDTO: RefreshTokenDTO) {
+    try {
+      const { sub } = await this.jwtService.verifyAsync<{ sub: number }>(
+        refreshTokenDTO.refreshToken,
+        {
+          secret: this.jwtConfiguration.secret,
+          audience: this.jwtConfiguration.audience,
+          issuer: this.jwtConfiguration.issuer,
+        },
+      );
+
+      const user = await this.userRepository.findOneBy({ id: sub });
+
+      if (!user) {
+        throw new UnauthorizedException('Usuário não encontrado');
+      }
+
+      return this.generateTokens(user);
+    } catch {
+      throw new UnauthorizedException('Refresh token inválido ou expirado');
+    }
   }
 }
