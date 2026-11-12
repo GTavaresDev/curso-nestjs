@@ -13,6 +13,7 @@ import {
   UsePipes,
   UseInterceptors,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { RecadosService } from './recados.service';
 import { CreateRecadoDto } from './dto/create-recado.dto';
@@ -28,10 +29,14 @@ import type { Request } from 'express';
 import { IsPublic } from '../common/params/is-public.decorator';
 import { TokenPayloadParam } from '../auth/params/token-payload.param';
 import { TokenPayloadDto } from '../auth/dto/token-payload.dto';
+import { SetRoutePolicy } from '../auth/decorator/set-route-policy.decorator';
+import { RoutePolicies } from '../auth/enum/route-poliies.enum';
+import { RoutePolicyGuard } from '../auth/guards/route-policy.guard';
 
 @Controller('recados')
 @UsePipes(ParseIntIdPipe)
 @UseInterceptors(SimpleCacheInterceptor)
+@UseGuards(RoutePolicyGuard)
 export class RecadosController {
   constructor(private readonly recados: RecadosService) {}
 
@@ -39,6 +44,7 @@ export class RecadosController {
   @HttpCode(HttpStatus.OK)
   @UseInterceptors(AddHeaderInterceptor, TimingConnectionInterceptor)
   @Get()
+  @SetRoutePolicy(RoutePolicies.findAllRecados)
   findAll(
     @Query() paginationDto: PaginationDto,
     @Req() req: Request,
