@@ -30,14 +30,22 @@ export class RecadosService {
     return this.usuariosService.findOne(id);
   }
 
-  async create(recadoDto: CreateRecadoDto, tokenPayload: TokenPayloadDto) {
+  async create(
+    recadoDto: CreateRecadoDto,
+    tokenPayload: TokenPayloadDto,
+    files?: Express.Multer.File[],
+  ) {
     const de = await this.getUsuarioOrFail(tokenPayload.sub);
     const para = await this.getUsuarioOrFail(recadoDto.para);
+
+    const fotos = files?.map((file) => file.path) ?? recadoDto.fotos ?? [];
+
     const newRecado = this.recadoRepository.create({
       texto: recadoDto.texto,
       lido: false,
       de,
       para,
+      fotos,
     });
 
     return this.recadoRepository.save(newRecado);

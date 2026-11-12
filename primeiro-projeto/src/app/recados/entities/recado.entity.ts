@@ -31,4 +31,7 @@ export class Recado {
   @ManyToOne(() => Usuario)
   @JoinColumn({ name: 'para' })
   para: Usuario;
+
+  @Column('simple-array', { nullable: true })
+  fotos: string[];
 }

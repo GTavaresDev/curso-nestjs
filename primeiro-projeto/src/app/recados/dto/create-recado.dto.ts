@@ -1,6 +1,9 @@
+import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsInt,
   IsNotEmpty,
+  IsOptional,
   IsPositive,
   IsString,
   MinLength,
@@ -12,7 +15,13 @@ export class CreateRecadoDto {
   @MinLength(3)
   readonly texto: string;
 
+  @Type(() => Number)
   @IsInt()
   @IsPositive()
   readonly para: number; // ID do usuário que recebe
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  readonly fotos?: string[];
 }
