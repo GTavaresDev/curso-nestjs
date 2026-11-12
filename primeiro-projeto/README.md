@@ -57,6 +57,166 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## Exemplos de Requisições (cURL)
+
+Abaixo estão todos os comandos `curl` disponíveis para interagir com a API do projeto.
+
+> **Variáveis de ambiente / Pré-requisitos:**
+> - URL base padrão: `http://localhost:3000`
+> - Substitua `<SEU_TOKEN_JWT>` pelo token retornado na rota de login.
+> - Substitua `<SEU_REFRESH_TOKEN>` pelo refresh token retornado no login.
+
+---
+
+### 1. App / Status
+
+#### Health Check / Hello World (Público)
+```bash
+curl -X GET http://localhost:3000/
+```
+
+---
+
+### 2. Autenticação (`/auth`)
+
+#### Realizar Login (Público)
+Retorna o `accessToken` e o `refreshToken`.
+```bash
+curl -X POST http://localhost:3000/auth \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "usuario@exemplo.com",
+    "passwordHash": "senha123"
+  }'
+```
+
+#### Atualizar Tokens / Refresh Token (Público)
+```bash
+curl -X POST http://localhost:3000/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{
+    "refreshToken": "<SEU_REFRESH_TOKEN>"
+  }'
+```
+
+---
+
+### 3. Usuários (`/usuarios`)
+
+#### Criar Usuário (Autenticado)
+```bash
+curl -X POST http://localhost:3000/usuarios \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <SEU_TOKEN_JWT>" \
+  -d '{
+    "name": "Gabriel Tavares",
+    "email": "gabriel@exemplo.com",
+    "passwordHash": "senha123",
+    "active": true,
+    "role": "user"
+  }'
+```
+
+#### Listar Todos os Usuários (Autenticado)
+```bash
+curl -X GET http://localhost:3000/usuarios \
+  -H "Authorization: Bearer <SEU_TOKEN_JWT>"
+```
+
+#### Buscar Usuário por ID (Autenticado)
+```bash
+curl -X GET http://localhost:3000/usuarios/1 \
+  -H "Authorization: Bearer <SEU_TOKEN_JWT>"
+```
+
+#### Buscar Recados de um Usuário (Autenticado)
+```bash
+curl -X GET http://localhost:3000/usuarios/1/recados \
+  -H "Authorization: Bearer <SEU_TOKEN_JWT>"
+```
+
+#### Atualizar Usuário (Autenticado - apenas o próprio usuário)
+```bash
+curl -X PATCH http://localhost:3000/usuarios/1 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <SEU_TOKEN_JWT>" \
+  -d '{
+    "name": "Gabriel Tavares Atualizado"
+  }'
+```
+
+#### Remover Usuário (Autenticado)
+```bash
+curl -X DELETE http://localhost:3000/usuarios/1 \
+  -H "Authorization: Bearer <SEU_TOKEN_JWT>"
+```
+
+#### Upload de Foto de Perfil (Autenticado)
+Envia uma imagem (`.png`, `.jpg`, `.jpeg` até 5MB) vinculada ao usuário autenticado:
+```bash
+curl -X POST http://localhost:3000/usuarios/upload-picture \
+  -H "Authorization: Bearer <SEU_TOKEN_JWT>" \
+  -F "file=@/caminho/para/sua/foto.png"
+```
+
+#### Obter Foto de Perfil do Usuário (Público)
+```bash
+curl -X GET http://localhost:3000/usuarios/1/picture --output foto_usuario_1.png
+```
+
+---
+
+### 4. Recados (`/recados`)
+
+#### Listar Recados com Paginação (Autenticado - Role: `admin` ou `user`)
+```bash
+curl -X GET "http://localhost:3000/recados?limit=10&offset=0" \
+  -H "Authorization: Bearer <SEU_TOKEN_JWT>"
+```
+
+#### Buscar Recado por ID (Público)
+```bash
+curl -X GET http://localhost:3000/recados/1
+```
+
+#### Criar Recado (Autenticado)
+##### Sem upload de imagens (JSON):
+```bash
+curl -X POST http://localhost:3000/recados \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <SEU_TOKEN_JWT>" \
+  -d '{
+    "texto": "Olá, este é um recado!",
+    "para": 2
+  }'
+```
+
+##### Com upload de imagens (Multipart/form-data):
+```bash
+curl -X POST http://localhost:3000/recados \
+  -H "Authorization: Bearer <SEU_TOKEN_JWT>" \
+  -F "texto=Olá com fotos!" \
+  -F "para=2" \
+  -F "fotos=@/caminho/para/imagem1.png" \
+  -F "fotos=@/caminho/para/imagem2.jpg"
+```
+
+#### Atualizar Recado (Autenticado - apenas o autor do recado)
+```bash
+curl -X PATCH http://localhost:3000/recados/1 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <SEU_TOKEN_JWT>" \
+  -d '{
+    "texto": "Recado atualizado com sucesso!"
+  }'
+```
+
+#### Deletar Recado (Autenticado - apenas o autor do recado)
+```bash
+curl -X DELETE http://localhost:3000/recados/1 \
+  -H "Authorization: Bearer <SEU_TOKEN_JWT>"
+```
+
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
