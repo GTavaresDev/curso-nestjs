@@ -12,8 +12,9 @@ export class SimpleCacheInterceptor implements NestInterceptor {
   async intercept(context: ExecutionContext, next: CallHandler<any>) {
     const request = context.switchToHttp().getRequest();
     const url = request.url;
+    const isGetMethod = request.method === 'GET';
 
-    if (this.cache.has(url)) {
+    if (isGetMethod && this.cache.has(url)) {
       console.log('Está no cache', url);
       return of(this.cache.get(url));
     }
@@ -21,8 +22,10 @@ export class SimpleCacheInterceptor implements NestInterceptor {
     await new Promise((resolve) => setTimeout(resolve, 3000));
     return next.handle().pipe(
       tap((data) => {
-        this.cache.set(url, data);
-        console.log('Armazenado no cache', url);
+        if (isGetMethod) {
+          this.cache.set(url, data);
+          console.log('Armazenado no cache', url);
+        }
       }),
     );
   }

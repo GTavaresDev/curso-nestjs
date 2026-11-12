@@ -43,9 +43,22 @@ export class RecadosService {
     return this.recadoRepository.save(newRecado);
   }
 
-  async findAll(paginationDto: PaginationDto) {
+  async findAll(
+    paginationDto: PaginationDto,
+    tokenPayload?: TokenPayloadDto,
+  ) {
     const { limit = 10, offset = 0 } = paginationDto;
+
+    const where =
+      tokenPayload?.role === 'admin'
+        ? undefined
+        : [
+            { de: { id: tokenPayload?.sub } },
+            { para: { id: tokenPayload?.sub } },
+          ];
+
     const recados = await this.recadoRepository.find({
+      where,
       skip: offset,
       take: limit,
       relations: {

@@ -40,17 +40,15 @@ import { RoutePolicyGuard } from '../auth/guards/route-policy.guard';
 export class RecadosController {
   constructor(private readonly recados: RecadosService) {}
 
-  @IsPublic()
   @HttpCode(HttpStatus.OK)
   @UseInterceptors(AddHeaderInterceptor, TimingConnectionInterceptor)
   @Get()
   @SetRoutePolicy(RoutePolicies.findAllRecados)
   findAll(
     @Query() paginationDto: PaginationDto,
-    @Req() req: Request,
+    @TokenPayloadParam() tokenPayload: TokenPayloadDto,
   ): Promise<Recado[]> {
-    console.log('Resposta do controller:', req.user);
-    return this.recados.findAll(paginationDto);
+    return this.recados.findAll(paginationDto, tokenPayload);
   }
 
   @IsPublic()

@@ -26,4 +26,8 @@ export class CreateUsuarioDto {
   @IsBoolean()
   @IsOptional()
   readonly active?: boolean;
+
+  @IsString()
+  @IsOptional()
+  readonly role?: string;
 }

@@ -69,7 +69,10 @@ export class AuthService {
 
   private async generateTokens(user: Usuario) {
     const [accessToken, refreshToken] = await Promise.all([
-      this.signJwt(user.id, this.jwtConfiguration.ttl, { email: user.email }),
+      this.signJwt(user.id, this.jwtConfiguration.ttl, {
+        email: user.email,
+        role: user.role,
+      }),
       this.signJwt(user.id, this.jwtConfiguration.jwtRefreshTtl),
     ]);
 
