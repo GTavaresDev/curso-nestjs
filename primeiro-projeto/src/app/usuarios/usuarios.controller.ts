@@ -7,7 +7,15 @@ import {
   Param,
   ParseIntPipe,
   Delete,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  BadRequestException,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import * as path from 'path';
 import { UsuariosService } from './usuarios.service';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
@@ -57,5 +65,49 @@ export class UsuariosController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usuariosService.remove(+id);
+  }
+
+  @Post('upload-picture')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: {
+        fileSize: 10 * 1024 * 1024, // 10MB
+      },
+      fileFilter: (req, file, cb) => {
+        if (!file.mimetype.match(/\/(jpg|jpeg|png|webp)$/)) {
+          return cb(
+            new BadRequestException(
+              'Apenas arquivos de imagem (jpg, jpeg, png, webp) são permitidos.',
+            ),
+            false,
+          );
+        }
+        cb(null, true);
+      },
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const fileExtension = path.extname(file.originalname).toLowerCase();
+          const fileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${fileExtension}`;
+          cb(null, fileName);
+        },
+      }),
+    }),
+  )
+  uploadPicture(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({
+            maxSize: 10 * 1024 * 1024, // 10MB
+            message: 'O arquivo não pode exceder 10MB',
+          }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+    @TokenPayloadParam() tokenPayload: TokenPayloadDto,
+  ) {
+    return this.usuariosService.uploadPicture(file, tokenPayload);
   }
 }

@@ -125,6 +125,30 @@ export class UsuariosService {
     return this.usersRepository.remove(user);
   }
 
+  async uploadPicture(
+    file: Express.Multer.File,
+    tokenPayload: TokenPayloadDto,
+  ) {
+    if (!file) {
+      throw new NotFoundException('Arquivo de imagem não enviado.');
+    }
+
+    const user = await this.findOne(tokenPayload.sub);
+
+    user.picture = file.path;
+    await this.usersRepository.save(user);
+
+    return {
+      message: 'Foto de perfil atualizada com sucesso',
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        picture: user.picture,
+      },
+    };
+  }
+
   private isDuplicateEmailError(error: unknown): boolean {
     return (
       typeof error === 'object' &&

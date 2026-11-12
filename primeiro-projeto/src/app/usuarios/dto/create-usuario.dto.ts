@@ -30,4 +30,8 @@ export class CreateUsuarioDto {
   @IsString()
   @IsOptional()
   readonly role?: string;
+
+  @IsString()
+  @IsOptional()
+  readonly picture?: string;
 }
