@@ -9,7 +9,10 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
+import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as path from 'path';
@@ -21,6 +24,7 @@ import { ReqDataParams } from '../common/params/req-data.params';
 import { TokenPayloadParam } from '../auth/params/token-payload.param';
 import { TokenPayloadDto } from '../auth/dto/token-payload.dto';
 import { ImageFileValidationPipe } from '../common/pipes/image-file-validation.pipe';
+import { IsPublic } from '../common/params/is-public.decorator';
 
 @Controller('usuarios')
 export class UsuariosController {
@@ -92,5 +96,24 @@ export class UsuariosController {
     @TokenPayloadParam() tokenPayload: TokenPayloadDto,
   ) {
     return this.usuariosService.uploadPicture(file, tokenPayload);
+  }
+
+  @IsPublic()
+  @Get(':id/picture')
+  async getPicture(
+    @Param('id', ParseIntPipe) id: number,
+    @Res() res: Response,
+  ) {
+    const user = await this.usuariosService.findOne(id);
+
+    if (!user.picture || !fs.existsSync(user.picture)) {
+      return res.status(404).json({
+        statusCode: 404,
+        message: 'Foto de perfil não encontrada para este usuário',
+      });
+    }
+
+    const absolutePath = path.resolve(user.picture);
+    return res.sendFile(absolutePath);
   }
 }
