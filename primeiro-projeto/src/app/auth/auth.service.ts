@@ -41,6 +41,10 @@ export class AuthService {
       throw new UnauthorizedException('Usuário ou senha invalido');
     }
 
+    if (!user.active) {
+      throw new UnauthorizedException('Usuário inativo');
+    }
+
     return this.generateTokens(user);
   }
 
@@ -92,8 +96,15 @@ export class AuthService {
         throw new UnauthorizedException('Usuário não encontrado');
       }
 
+      if (!user.active) {
+        throw new UnauthorizedException('Usuário inativo');
+      }
+
       return this.generateTokens(user);
-    } catch {
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
       throw new UnauthorizedException('Refresh token inválido ou expirado');
     }
   }

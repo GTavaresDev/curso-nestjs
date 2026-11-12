@@ -38,4 +38,7 @@ export class Usuario {
   // Ou seja na tabela recado no campo "para" fica vincualdo um Usuario
   @OneToMany(() => Recado, (recado) => recado.para)
   recadoRecebidos: Recado[];
+
+  @Column({ default: true })
+  active: boolean;
 }
