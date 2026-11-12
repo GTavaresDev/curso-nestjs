@@ -15,11 +15,11 @@ import {
   Req,
   UseGuards,
   UploadedFiles,
-  BadRequestException,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as path from 'path';
+import { ImageFileValidationPipe } from '../common/pipes/image-file-validation.pipe';
 import { RecadosService } from './recados.service';
 import { CreateRecadoDto } from './dto/create-recado.dto';
 import { UpdateRecadoDto } from './dto/update-recado.dto';
@@ -68,18 +68,7 @@ export class RecadosController {
   @UseInterceptors(
     FilesInterceptor('fotos', 10, {
       limits: {
-        fileSize: 10 * 1024 * 1024, // 10MB por arquivo
-      },
-      fileFilter: (req, file, cb) => {
-        if (!file.mimetype.match(/\/(jpg|jpeg|png|webp)$/)) {
-          return cb(
-            new BadRequestException(
-              'Apenas imagens (jpg, jpeg, png, webp) são permitidas.',
-            ),
-            false,
-          );
-        }
-        cb(null, true);
+        fileSize: 5 * 1024 * 1024, // Limite de 5MB por arquivo
       },
       storage: diskStorage({
         destination: './uploads/recados',
@@ -94,7 +83,13 @@ export class RecadosController {
   createRecado(
     @Body() recado: CreateRecadoDto,
     @TokenPayloadParam() tokenPayload: TokenPayloadDto,
-    @UploadedFiles() files?: Express.Multer.File[],
+    @UploadedFiles(
+      new ImageFileValidationPipe({
+        maxSizeBytes: 5 * 1024 * 1024, // 5MB
+        required: false, // fotos são opcionais nos recados
+      }),
+    )
+    files?: Express.Multer.File[],
   ) {
     return this.recados.create(recado, tokenPayload, files);
   }

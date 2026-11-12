@@ -9,9 +9,6 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
-  ParseFilePipe,
-  MaxFileSizeValidator,
-  BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -23,6 +20,7 @@ import { UrlParam } from '../common/params/url.params';
 import { ReqDataParams } from '../common/params/req-data.params';
 import { TokenPayloadParam } from '../auth/params/token-payload.param';
 import { TokenPayloadDto } from '../auth/dto/token-payload.dto';
+import { ImageFileValidationPipe } from '../common/pipes/image-file-validation.pipe';
 
 @Controller('usuarios')
 export class UsuariosController {
@@ -71,18 +69,7 @@ export class UsuariosController {
   @UseInterceptors(
     FileInterceptor('file', {
       limits: {
-        fileSize: 10 * 1024 * 1024, // 10MB
-      },
-      fileFilter: (req, file, cb) => {
-        if (!file.mimetype.match(/\/(jpg|jpeg|png|webp)$/)) {
-          return cb(
-            new BadRequestException(
-              'Apenas arquivos de imagem (jpg, jpeg, png, webp) são permitidos.',
-            ),
-            false,
-          );
-        }
-        cb(null, true);
+        fileSize: 5 * 1024 * 1024, // Limite de 5MB
       },
       storage: diskStorage({
         destination: './uploads',
@@ -96,13 +83,9 @@ export class UsuariosController {
   )
   uploadPicture(
     @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({
-            maxSize: 10 * 1024 * 1024, // 10MB
-            message: 'O arquivo não pode exceder 10MB',
-          }),
-        ],
+      new ImageFileValidationPipe({
+        maxSizeBytes: 5 * 1024 * 1024, // 5MB
+        required: true,
       }),
     )
     file: Express.Multer.File,
