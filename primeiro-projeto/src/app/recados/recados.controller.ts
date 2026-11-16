@@ -37,10 +37,12 @@ import { TokenPayloadDto } from '../auth/dto/token-payload.dto';
 import { SetRoutePolicy } from '../auth/decorator/set-route-policy.decorator';
 import { RoutePolicies } from '../auth/enum/route-poliies.enum';
 import { RoutePolicyGuard } from '../auth/guards/route-policy.guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('recados')
 @UsePipes(ParseIntIdPipe)
 @UseInterceptors(SimpleCacheInterceptor)
+@ApiBearerAuth()
 @UseGuards(RoutePolicyGuard)
 export class RecadosController {
   constructor(private readonly recados: RecadosService) {}

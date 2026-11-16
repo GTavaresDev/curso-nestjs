@@ -19,6 +19,7 @@ async function bootstrap() {
     .setTitle('Recados api')
     .setDescription('')
     .setVersion('1')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, documentBuilderConfig);
