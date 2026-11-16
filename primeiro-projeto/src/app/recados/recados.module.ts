@@ -5,12 +5,13 @@ import { RecadosService } from './recados.service';
 import { Recado } from './entities/recado.entity';
 import { UsuariosModule } from '../usuarios/usuarios.module';
 import { RegexFactory } from '../common/regex/regex.factory';
-import { RemoveSpacesRegex } from '../common/regex/remove-spaces.regex';
+import { EmailModule } from '../../email/email.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Recado]),
     forwardRef(() => UsuariosModule),
+    EmailModule,
   ],
   controllers: [RecadosController],
   providers: [RecadosService, RegexFactory],

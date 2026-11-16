@@ -3,6 +3,7 @@ import {
   forwardRef,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateRecadoDto } from './dto/create-recado.dto';
@@ -15,15 +16,19 @@ import { PaginationDto } from '../common/dto/pagination.dto';
 import { UsuariosService } from '../usuarios/usuarios.service';
 import { RegexFactory } from '../common/regex/regex.factory';
 import { TokenPayloadDto } from '../auth/dto/token-payload.dto';
+import { EmailService } from '../../email/email.service';
 
 @Injectable()
 export class RecadosService {
+  private readonly logger = new Logger(RecadosService.name);
+
   constructor(
     @InjectRepository(Recado)
     private readonly recadoRepository: Repository<Recado>,
     @Inject(forwardRef(() => UsuariosService))
     private readonly usuariosService: UsuariosService,
     private readonly regexFactory: RegexFactory,
+    private readonly emailService: EmailService,
   ) {}
 
   private async getUsuarioOrFail(id: number): Promise<Usuario> {
@@ -48,13 +53,26 @@ export class RecadosService {
       fotos,
     });
 
-    return this.recadoRepository.save(newRecado);
+    const recadoSalvo = await this.recadoRepository.save(newRecado);
+
+    try {
+      const destinatario = process.env.EMAIL_TO || para.email;
+      await this.emailService.sendEmail(
+        destinatario,
+        `Voce recebeu um recado de ${de.name} ${de.email}`,
+        recadoDto.texto,
+      );
+    } catch (error) {
+      const destinatario = process.env.EMAIL_TO || para.email;
+      this.logger.error(
+        `Falha ao enviar e-mail para ${destinatario}: ${error instanceof Error ? error.message : error}`,
+      );
+    }
+
+    return recadoSalvo;
   }
 
-  async findAll(
-    paginationDto: PaginationDto,
-    tokenPayload?: TokenPayloadDto,
-  ) {
+  async findAll(paginationDto: PaginationDto, tokenPayload?: TokenPayloadDto) {
     const { limit = 10, offset = 0 } = paginationDto;
 
     const where =

@@ -13,6 +13,7 @@ import { MyExceptionFilter } from './common/filters/my-exception.filter';
 import { UsuariosController } from './usuarios/usuarios.controller';
 import { RecadosController } from './recados/recados.controller';
 import { AuthModule } from './auth/auth.module';
+import { EmailModule } from '../email/email.module';
 
 const databaseLogger = new Logger('Database');
 
@@ -38,6 +39,7 @@ const databaseLogger = new Logger('Database');
     RecadosModule,
     UsuariosModule,
     AuthModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [
