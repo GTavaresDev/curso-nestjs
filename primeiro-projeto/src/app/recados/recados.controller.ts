@@ -23,7 +23,7 @@ import { ImageFileValidationPipe } from '../common/pipes/image-file-validation.p
 import { RecadosService } from './recados.service';
 import { CreateRecadoDto } from './dto/create-recado.dto';
 import { UpdateRecadoDto } from './dto/update-recado.dto';
-import type { Recado } from './entities/recado.entity';
+import { ResponseRecadoDto } from './dto/response-recado.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { ParseIntIdPipe } from '../common/pipes/parse-int-id.pipe';
 import { AddHeaderInterceptor } from '../common/interceptors/add-header.interceptor';
@@ -52,7 +52,7 @@ export class RecadosController {
   findAll(
     @Query() paginationDto: PaginationDto,
     @TokenPayloadParam() tokenPayload: TokenPayloadDto,
-  ): Promise<Recado[]> {
+  ): Promise<ResponseRecadoDto[]> {
     return this.recados.findAll(paginationDto, tokenPayload);
   }
 

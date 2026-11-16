@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { CreateRecadoDto } from './dto/create-recado.dto';
 import { UpdateRecadoDto } from './dto/update-recado.dto';
+import { ResponseRecadoDto } from './dto/response-recado.dto';
 import { Recado } from './entities/recado.entity';
 import type { Usuario } from '../usuarios/entities/usuario.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -72,7 +73,10 @@ export class RecadosService {
     return recadoSalvo;
   }
 
-  async findAll(paginationDto: PaginationDto, tokenPayload?: TokenPayloadDto) {
+  async findAll(
+    paginationDto: PaginationDto,
+    tokenPayload?: TokenPayloadDto,
+  ): Promise<ResponseRecadoDto[]> {
     const { limit = 10, offset = 0 } = paginationDto;
 
     const where =
