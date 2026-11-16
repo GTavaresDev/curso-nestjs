@@ -1,25 +1,29 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class EmailService {
   private transporter: nodemailer.Transporter;
 
-  constructor() {
+  constructor(private readonly configService: ConfigService) {
+    const port = Number(this.configService.get<string>('EMAIL_PORT') ?? 2525);
+
     this.transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: Number(process.env.EMAIL_PORT ?? 2525),
-      secure: Number(process.env.EMAIL_PORT) === 465,
+      host: this.configService.get<string>('EMAIL_HOST')?.trim(),
+      port,
+      secure: port === 465,
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: this.configService.get<string>('EMAIL_USER')?.trim(),
+        pass: this.configService.get<string>('EMAIL_PASS')?.trim(),
       },
     });
   }
 
   async sendEmail(to: string, subject: string, content: string) {
+    const fromEmail = this.configService.get<string>('EMAIL_FROM')?.trim();
     const mailOptions = {
-      from: `Gabriel <${process.env.EMAIL_FROM}>`,
+      from: `Gabriel <${fromEmail}>`,
       to,
       subject,
       text: content,
